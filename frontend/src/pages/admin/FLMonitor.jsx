@@ -187,9 +187,8 @@ const FLMonitor = () => {
 
   // ─── Real-time FL updates via WebSocket ─────────────────────────────────
   useEffect(() => {
-    const wsHost = window.location.hostname || 'localhost';
-    const wsProto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${wsProto}://${wsHost}:8000/ws/fl/global/`);
+    const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+    const ws = new WebSocket(`${WS_BASE}/ws/fl/global/`);
 
     ws.onopen = () => console.log('[FLMonitor] WebSocket connected');
 

@@ -5,7 +5,7 @@ import API from '../../api/axios';
 const now = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-const wsBase = (API.defaults.baseURL || 'http://localhost:8000').replace(/^http/, 'ws');
+const wsBase = (API.defaults.baseURL || process.env.REACT_APP_API_URL).replace(/^http/, 'ws');
 
 /**
  * Live consultation chat shared by doctor and patient. Both sides connect to

@@ -17,7 +17,7 @@ import useApi from '../../hooks/useApi';
 import API from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
 
-const API_HOST = 'http://localhost:8000';
+const API_HOST = process.env.REACT_APP_API_URL;
 
 const rxFileUrl = (o) => {
   const path = o.prescription_local_url || o.prescription_url || '';
@@ -93,7 +93,8 @@ const PharmacistDashboard = () => {
 
     let ws;
     try {
-      ws = new WebSocket(`ws://localhost:8000/ws/medicine/${loginId}/`);
+      const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+      ws = new WebSocket(`${WS_BASE}/ws/medicine/${loginId}/`);
       ws.onmessage = (event) => {
         let msg;
         try { msg = JSON.parse(event.data); } catch { return; }

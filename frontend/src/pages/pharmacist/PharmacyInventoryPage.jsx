@@ -30,7 +30,7 @@ const CATEGORY_EMOJI = {
   other: '🏥',
 };
 
-const API_HOST = 'http://localhost:8000';
+const API_HOST = process.env.REACT_APP_API_URL;
 
 const EMPTY = {
   medicine_name: '', generic_name: '', category: 'tablet', description: '',

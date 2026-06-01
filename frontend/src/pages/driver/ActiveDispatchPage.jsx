@@ -68,7 +68,8 @@ const ActiveDispatchPage = () => {
 
   useEffect(() => {
     if (!dispatch?.id) return undefined;
-    const ws = new WebSocket(`ws://localhost:8000/ws/gps/${dispatch.id}/`);
+    const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+    const ws = new WebSocket(`${WS_BASE}/ws/gps/${dispatch.id}/`);
     ws.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);

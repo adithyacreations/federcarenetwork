@@ -125,7 +125,8 @@ const PatientDashboard = () => {
 
     let ws;
     try {
-      ws = new WebSocket(`ws://localhost:8000/ws/notifications/${loginId}/`);
+      const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+      ws = new WebSocket(`${WS_BASE}/ws/notifications/${loginId}/`);
       wsRef.current = ws;
       ws.onmessage = (event) => {
         let msg;

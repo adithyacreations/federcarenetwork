@@ -38,7 +38,8 @@ export function PatientWSProvider({ children }) {
     const connect = () => {
       let ws;
       try {
-        ws = new WebSocket(`ws://localhost:8000/ws/notifications/${loginId}/`);
+        const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+        ws = new WebSocket(`${WS_BASE}/ws/notifications/${loginId}/`);
       } catch {
         return; // REST polling on each page still keeps data fresh.
       }

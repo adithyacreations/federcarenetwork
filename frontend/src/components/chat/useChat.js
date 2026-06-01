@@ -45,7 +45,8 @@ const useChat = ({ chatId, userType, userLoginId }) => {
     if (!userLoginId || !userType) return undefined;
     let socket;
     try {
-      socket = new WebSocket(`ws://localhost:8000/ws/chat/${userType}/${userLoginId}/`);
+      const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+      socket = new WebSocket(`${WS_BASE}/ws/chat/${userType}/${userLoginId}/`);
     } catch {
       return undefined;
     }

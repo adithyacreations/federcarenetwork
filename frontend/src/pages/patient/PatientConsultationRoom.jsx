@@ -65,7 +65,7 @@ export default function PatientConsultationRoom() {
     try {
       const token = localStorage.getItem('access_token') || localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:8000/api/doctor/prescriptions/${prescriptionId}/download/`,
+        `${process.env.REACT_APP_API_URL}/api/doctor/prescriptions/${prescriptionId}/download/`,
         { headers: token ? { Authorization: `Bearer ${token}` } : {} },
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);

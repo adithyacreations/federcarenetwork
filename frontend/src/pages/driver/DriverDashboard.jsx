@@ -109,7 +109,8 @@ const DriverDashboard = () => {
   const connectWs = useCallback((dispatchId) => {
     if (!dispatchId) return;
     if (wsRef.current) wsRef.current.close();
-    const ws = new WebSocket(`ws://localhost:8000/ws/gps/${dispatchId}/`);
+    const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+    const ws = new WebSocket(`${WS_BASE}/ws/gps/${dispatchId}/`);
     ws.onmessage = (e) => {
       try {
         const msg = JSON.parse(e.data);
@@ -137,7 +138,8 @@ const DriverDashboard = () => {
 
     let ws;
     try {
-      ws = new WebSocket(`ws://localhost:8000/ws/emergency/${loginId}/`);
+      const WS_BASE = process.env.REACT_APP_API_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+      ws = new WebSocket(`${WS_BASE}/ws/emergency/${loginId}/`);
       ws.onmessage = (e) => {
         let msg;
         try { msg = JSON.parse(e.data); } catch { return; }
