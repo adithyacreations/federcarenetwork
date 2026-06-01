@@ -1,0 +1,19 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+db.sqlite3
+.env
+media/
+*.pkl
+node_modules/
+build/
+.DS_Store
+
+# Large dataset files
+chest_xray/
+ml_models/chest_xray_model.h5
+ml_models/xray_training_history.png
+ml_models/fl_weights/
+ml_models/datasets/
+*.h5
