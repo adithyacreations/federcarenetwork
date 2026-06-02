@@ -1,4 +1,5 @@
 import os
+import google.generativeai as genai
 from decimal import Decimal
 from collections import Counter
 
@@ -726,3 +727,129 @@ class ChestMultiLabelView(APIView):
                 'success': False,
                 'message': f'Prediction failed: {str(e)}',
             }, status=500)
+
+
+# ════════════════════════════════════════════════════════════════════════════
+#  Gemini AI Chatbot and Health Summary Integration
+# ════════════════════════════════════════════════════════════════════════════
+
+class ChatbotView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        message = request.data.get('message', '').strip()
+        history = request.data.get('history', [])
+
+        if not message:
+            return err('Message is required.')
+
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return err('Gemini API key is not configured on the server.', status_code=500)
+
+        genai.configure(api_key=api_key)
+
+        # The system instruction from FederCareChatbot.jsx
+        system_instruction = '''
+You are FederCare Assistant, a helpful medical AI chatbot for FederCare: AI Health Network platform built as MCA final year project at Mar Thoma Institute of Information Technology, Ayur, Kollam, Kerala.
+Developer: Adithya M
+Guide: Mrs. Princy Thomas
+
+ABOUT FEDERCARE:
+FederCare is a complete digital healthcare platform connecting hospitals, doctors, patients, pharmacists, lab techs, ambulance drivers and vendors. It uses Federated Learning to train AI models across hospitals without sharing patient data.
+
+KEY FEATURES:
+- Federated Learning with FedAvg algorithm
+- AI models:
+  1. Symptom Checker (Logistic Regression - 41 diseases)
+  2. Clinical Diagnosis (Random Forest)
+  3. Pneumonia Detection (MobileNetV2)
+  4. Chest X-Ray 14 Conditions (MobileNetV2 - AUC 0.80)
+  5. Brain Tumor MRI Detection (MobileNetV2 - 90.6% accuracy)
+  6. AI Health Summary (Gemini API)
+- Video Consultation via Jitsi Meet
+- Emergency SOS with GPS tracking
+- EHR Wallet with QR consent system
+- Medicine ordering with prescription verification
+- Lab test booking and reports
+- Equipment ordering for hospitals
+- Epidemic detection and alerts
+- Razorpay payment integration
+- Real-time WebSocket notifications
+
+8 USER ROLES:
+Super Admin, Hospital Admin, Doctor, Patient, Pharmacist, Lab Technician, Ambulance Driver, Equipment Vendor
+
+TECH STACK:
+Django 4.2, React 18, Tailwind CSS, Scikit-learn, TensorFlow 2.15, Flower FL, SQLite, Cloudinary, Jitsi Meet, Razorpay, Django Channels
+
+INSTRUCTIONS:
+- Answer FederCare questions using above info
+- Answer general medical questions
+- Keep responses short and clear
+- If off-topic politely redirect to medical or FederCare topics
+'''
+        try:
+            model = genai.GenerativeModel(
+                model_name='gemini-2.5-flash',
+                system_instruction=system_instruction
+            )
+
+            # Reconstruct history into format google-generativeai expects if any
+            # The frontend sends history as [{role: 'user'|'model', parts: [{text: '...'}]}]
+            formatted_history = []
+            for msg in history:
+                role = msg.get('role')
+                parts = msg.get('parts', [])
+                if role in ['user', 'model'] and parts:
+                    formatted_history.append({'role': role, 'parts': [p.get('text', '') for p in parts]})
+
+            chat = model.start_chat(history=formatted_history)
+            response = chat.send_message(
+                message,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=300,
+                    temperature=0.7,
+                )
+            )
+            return ok('Chat response generated successfully.', {'reply': response.text})
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return err(f'Chatbot error: {str(e)}', status_code=500)
+
+
+class HealthSummaryView(APIView):
+    permission_classes = [IsAuthenticated, IsPatient]
+
+    def post(self, request):
+        prompt = request.data.get('prompt')
+        if not prompt:
+            return err('Prompt is required.')
+
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return err('Gemini API key is not configured on the server.', status_code=500)
+
+        genai.configure(api_key=api_key)
+
+        try:
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    temperature=0.7,
+                    max_output_tokens=800,
+                )
+            )
+            
+            # The text might be empty if the model refused to answer
+            text = response.text if response.parts else ""
+            if not text:
+                return err('Empty response from Gemini', status_code=500)
+
+            return ok('Summary generated.', {'text': text})
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return err(f'Health summary error: {str(e)}', status_code=500)

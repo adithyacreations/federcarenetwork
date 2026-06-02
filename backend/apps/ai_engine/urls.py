@@ -10,6 +10,8 @@ from .views import (
     XRayPredictionView,
     BrainTumorPredictionView,
     ChestMultiLabelView,
+    ChatbotView,
+    HealthSummaryView,
 )
 
 urlpatterns = [
@@ -23,4 +25,6 @@ urlpatterns = [
     path('xray-predict/', XRayPredictionView.as_view(), name='ai-xray-predict'),
     path('brain-tumor/', BrainTumorPredictionView.as_view(), name='ai-brain-tumor'),
     path('chest-multilabel/', ChestMultiLabelView.as_view(), name='ai-chest-multilabel'),
+    path('chat/', ChatbotView.as_view(), name='ai-chat'),
+    path('health-summary/', HealthSummaryView.as_view(), name='ai-health-summary'),
 ]
